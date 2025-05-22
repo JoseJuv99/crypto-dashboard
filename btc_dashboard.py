@@ -42,7 +42,7 @@ st.plotly_chart(rsi_fig, use_container_width=True)
 
 # === RSI Signal ===
 latest_rsi = btc["RSI"].iloc[-1]
-rsi_status = "Overbought" if latest_rsi > 70 else "Oversold" if latest_rsi < 30 else "Neutral"
+rsi_status = "Overbought" if latest_rsi > 80 else "Oversold" if latest_rsi < 30 else "Neutral"
 st.metric("Current RSI 14", f"{latest_rsi:.2f}", help="Relative Strength Index")
 
 # === TradingView Embed ===
