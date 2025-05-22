@@ -1,0 +1,43 @@
+from fredapi import Fred
+import pandas as pd
+
+fred = Fred(api_key=' e6e4b3ed7c54a173b6aecf5497578f4f') 
+
+# Ambil data M2
+usm2 = fred.get_series('M2NS')        # US M2
+cnm2 = fred.get_series('MABMM301CNM657S')  # China M2
+eum2 = fred.get_series('MABMM301EUM657S')  # EU M2
+jpm2 = fred.get_series('MABMM301JPM657S')  # Japan M2
+gbm2 = fred.get_series('MABMM301GBM657S')  # UK M2
+
+# Ambil kurs mata uang (pakai sumber dari exchangerate.host via API atau CSV)
+# Contoh manual: buat dataframe kurs
+cnyusd = pd.read_csv('cnyusd.csv', index_col=0, parse_dates=True)
+eurusd = pd.read_csv('eurusd.csv', index_col=0, parse_dates=True)
+jpyusd = pd.read_csv('jpyusd.csv', index_col=0, parse_dates=True)
+gbpusd = pd.read_csv('gbpusd.csv', index_col=0, parse_dates=True)
+
+# Gabungkan semua ke satu dataframe
+df = pd.DataFrame({
+    'cnm2': cnm2,
+    'usm2': usm2,
+    'eum2': eum2,
+    'jpm2': jpm2,
+    'gbm2': gbm2
+})
+
+# Gabungkan nilai tukar
+df = df.join([cnyusd['close'], eurusd['close'], jpyusd['close'], gbpusd['close']])
+df.columns = ['cnm2', 'usm2', 'eum2', 'jpm2', 'gbm2', 'cnyusd', 'eurusd', 'jpyusd', 'gbpusd']
+
+# Hitung total indeks
+df['total_liquidity_index'] = (
+    df['cnm2'] * df['cnyusd'] +
+    df['usm2'] +
+    df['eum2'] * df['eurusd'] +
+    df['jpm2'] * df['jpyusd'] +
+    df['gbm2'] * df['gbpusd']
+) / 100000000000
+
+# Simpan ke CSV
+df.to_csv('m2_global_liquidity_index.csv')
